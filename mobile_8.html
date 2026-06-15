@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="勇者之旅">
+<title>Galgame 日文學習</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  :root {
+    --bg:#2b2419; --paper:#e8d9b5; --paper2:#ddc9a0; --paper3:#d0b888;
+    --border:#6b5638; --blue:#20406e; --blue-dark:#16304f; --frame:#f4ead0;
+    --text:#3a2e1c; --text2:#5c4a30; --text3:#8a7350; --on-blue:#f0e8d4;
+    --gold:#c8941c; --accent:#a8702c; --green:#4a8a3a; --teal:#3a8a7a; --coral:#c0603a; --hp:#c0392b;
+  }
+  body {
+    background:
+      radial-gradient(800px 500px at 80% -10%, rgba(120,90,50,0.15), transparent 55%),
+      linear-gradient(170deg,#2b2419,#322a1d 50%,#251f15);
+    background-attachment:fixed;
+    color:var(--text);
+    font-family:"Noto Sans TC",system-ui,sans-serif;
+    min-height:100vh; padding:16px; padding-bottom:40px;
+  }
+  .wrap { max-width:480px; margin:0 auto; }
+  .header { text-align:center; padding:12px 0 20px; }
+  .header h1 {
+    font-family:"DotGothic16",serif; font-size:22px; color:var(--gold);
+    text-shadow:1px 1px 0 rgba(0,0,0,0.4); letter-spacing:1px;
+  }
+  .header .date { font-size:13px; color:#d8c8a8; margin-top:4px; }
+
+  .card {
+    background:var(--paper); border:3px solid var(--border);
+    box-shadow:0 4px 16px rgba(0,0,0,0.3), inset 0 0 0 2px rgba(255,255,255,0.25);
+    border-radius:8px; padding:18px; margin-bottom:14px;
+  }
+  .card-title {
+    font-family:"DotGothic16",monospace; font-size:14px; font-weight:700;
+    color:var(--accent); letter-spacing:1px; margin-bottom:14px;
+  }
+
+  /* 大數字統計 */
+  .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .stat {
+    background:var(--blue); border:3px solid var(--frame);
+    box-shadow:0 0 0 2px var(--border); border-radius:8px;
+    padding:16px 10px; text-align:center;
+  }
+  .stat-num { font-family:"DotGothic16",serif; font-size:30px; font-weight:700; color:var(--gold); line-height:1; margin-bottom:6px; text-shadow:1px 1px 0 rgba(0,0,0,0.4); }
+  .stat-label { font-size:12px; color:var(--on-blue); }
+
+  /* 連續天數大卡 */
+  .streak-card {
+    background:linear-gradient(135deg,var(--blue),var(--blue-dark));
+    border:3px solid var(--frame); box-shadow:0 0 0 2px var(--border);
+    border-radius:8px; padding:24px; text-align:center; margin-bottom:14px;
+  }
+  .streak-flame { font-size:40px; }
+  .streak-num { font-family:"DotGothic16",serif; font-size:56px; font-weight:700; color:var(--gold); line-height:1; text-shadow:2px 2px 0 rgba(0,0,0,0.5); }
+  .streak-label { font-size:14px; color:var(--on-blue); margin-top:6px; letter-spacing:1px; }
+
+  /* 戰鬥畫面 */
+  .monster-stage {
+    background:linear-gradient(180deg,#2e5488,#16304f);
+    border:3px solid var(--frame); box-shadow:0 0 0 2px var(--border), inset 0 -20px 40px rgba(0,0,0,0.3);
+    border-radius:8px; padding:20px; text-align:center; margin-bottom:12px;
+  }
+  .monster-name { font-family:"DotGothic16",serif; font-size:20px; font-weight:700; color:#fff; margin-bottom:4px; }
+  .monster-tier { font-size:11px; color:#9cc4f0; letter-spacing:2px; margin-bottom:14px; }
+  .monster-sprite { width:120px; height:120px; image-rendering:pixelated; filter:drop-shadow(0 6px 16px rgba(0,0,0,0.5)); }
+  .hp-label { display:flex; justify-content:space-between; font-size:13px; color:var(--text2); font-weight:600; margin:14px 0 6px; }
+  .hp-track { height:18px; background:var(--blue-dark); border:2px solid var(--border); border-radius:4px; overflow:hidden; }
+  .hp-fill { height:100%; background:linear-gradient(180deg,#e85a4a,#c0392b); transition:width 0.6s ease; }
+
+  .hero-rank {
+    display:inline-flex; align-items:center; gap:8px; padding:8px 16px;
+    background:var(--blue); border:2px solid var(--frame); box-shadow:0 0 0 2px var(--border);
+    border-radius:6px; color:var(--gold); font-weight:700; font-size:15px; margin-bottom:14px;
+  }
+
+  /* 圖鑑迷你 */
+  .bestiary-mini { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
+  .bcell { background:var(--paper2); border:2px solid var(--border); border-radius:6px; padding:8px 4px; text-align:center; }
+  .bcell.defeated { border-color:var(--accent); background:rgba(168,112,44,0.12); }
+  .bcell.current { border-color:var(--coral); }
+  .bcell.locked { opacity:0.4; }
+  .bcell svg, .bcell .qmark { width:36px; height:36px; }
+  .qmark { display:flex; align-items:center; justify-content:center; font-size:20px; color:var(--text3); margin:0 auto; }
+
+  /* 成就迷你 */
+  .ach-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .ach { display:flex; align-items:center; gap:8px; background:var(--paper2); border:2px solid var(--border); border-radius:6px; padding:10px; }
+  .ach.unlocked { border-color:var(--gold); background:rgba(200,148,28,0.12); }
+  .ach.locked { opacity:0.45; }
+  .ach-icon { font-size:20px; }
+  .ach-name { font-size:12px; font-weight:700; color:var(--text); }
+
+  .progress-text { text-align:center; font-size:13px; color:var(--text2); margin-top:10px; }
+  .loading, .error { text-align:center; padding:60px 20px; color:#d8c8a8; }
+  .error { color:var(--coral); }
+  .refresh-btn {
+    display:block; width:100%; padding:14px; margin-top:8px;
+    background:var(--blue); color:var(--gold); border:2px solid var(--frame);
+    box-shadow:0 0 0 2px var(--border); border-radius:6px;
+    font-family:inherit; font-size:15px; font-weight:700; cursor:pointer;
+  }
+  .setup-box { background:var(--paper2); border:2px dashed var(--border); border-radius:8px; padding:16px; font-size:13px; line-height:1.8; color:var(--text2); }
+  .setup-box code { background:var(--blue-dark); color:var(--on-blue); padding:2px 6px; border-radius:3px; font-size:12px; word-break:break-all; }
+  input { width:100%; padding:12px; background:#f4ead0; border:2px solid var(--border); border-radius:6px; font-size:14px; margin-top:8px; }
+
+  /* 學習內容 */
+  .vocab-item { background:var(--paper2); border:2px solid var(--border); border-radius:6px; padding:12px 14px; margin-bottom:8px; }
+  .vocab-word { font-family:"DotGothic16",sans-serif; font-weight:700; font-size:17px; color:var(--text); }
+  .vocab-meta { font-size:12px; color:var(--text3); margin-top:2px; }
+  .vocab-sent { font-size:13px; color:var(--text2); margin-top:5px; font-style:italic; }
+  .i1-item { background:var(--paper2); border-left:4px solid var(--teal); border-radius:0 6px 6px 0; padding:12px 14px; margin-bottom:8px; font-size:15px; line-height:1.8; color:var(--text); }
+  .scene-item { background:var(--paper2); border-left:4px solid var(--accent); border-radius:0 6px 6px 0; padding:12px 14px; margin-bottom:8px; }
+  .scene-title { font-weight:700; font-size:15px; color:var(--text); margin-bottom:4px; }
+  .scene-sum { font-size:13px; color:var(--text2); }
+  .scene-sent { font-size:13px; color:var(--text2); margin-top:5px; font-style:italic; }
+  .pattern-item { background:var(--paper2); border-left:4px solid var(--gold); border-radius:0 6px 6px 0; padding:12px 14px; margin-bottom:8px; }
+  .pattern-name { font-weight:700; font-size:15px; color:var(--text); margin-bottom:4px; }
+  .pattern-exp { font-size:13px; color:var(--text2); }
+  .pattern-ex { font-size:13px; color:var(--text2); margin-top:5px; font-style:italic; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>⚔ 勇者之旅</h1>
+    <div class="date" id="update-time">載入中...</div>
+  </div>
+  <div id="content">
+    <div class="loading">📡 讀取資料中...</div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════
+// 設定區：手機從 Supabase 讀資料
+// ════════════════════════════════════════
+let SB_URL = localStorage.getItem('supabase_url') || '';
+let SB_KEY = localStorage.getItem('supabase_key') || '';
+
+// 像素怪物生成器（與主系統相同）
+function makeMonsterSVG(type, color, size) {
+  size = size || 120;
+  const px = 16, cell = size / px;
+  const patterns = {
+    slime:["0000000000000000","0000000000000000","0000000000000000","0000011111100000","0000111111110000","0001111111111000","0011111111111100","0011111111111100","0111113113111110","0111113113111110","0111111111111110","0111111111111110","0011111111111100","0111111111111110","0011111111111100","0000000000000000"],
+    slime_king:["0000000110000000","0000011111100000","0000111111110000","0000011111100000","0000111111110000","0001111111111000","0011111111111100","0111111111111110","0111113113111110","0111113113111110","0111111111111110","0111111111111110","0011111111111100","0111111111111110","0011111111111100","0000000000000000"],
+    beast:["0000000000000000","0011000000001100","0011100000011100","0011110000111100","0001111111111000","0011111111111100","0111111111111110","0111311111131110","0111311111131110","0111111111111110","0111112112111110","0111111111111110","0011111111111100","0011011111101100","0010001111000100","0000000000000000"],
+    wolf:["0000000000000000","0110000000000110","0111000000001110","0111100000011110","0011111111111100","0111111111111110","0111311111131110","0111311111131110","0111111111111110","0111111441111110","0111111111111110","0011111111111100","0011111111111100","0011100000011100","0011000000001100","0000000000000000"],
+    bat:["0000000000000000","0000000000000000","1100000000000011","1110000000000111","1111000000001111","1111110110111111","1111111111111111","0111313113131110","0011111111111100","0001111111111000","0000111111110000","0000011111100000","0000001111000000","0000000110000000","0000000000000000","0000000000000000"],
+    harpy:["0000011110000000","0000111111000000","0000113113000000","0000111111000000","0001111111100000","1101111111101100","1111111111111110","1111111111111111","0111111111111110","0011111111111100","0001111111110000","0011111111111000","0110011111100110","0100001111000010","0000000110000000","0000000000000000"],
+    wyvern:["0000000000000000","1100000000000000","1110000110000000","1111001111000000","1111111113110000","0111111111111000","0011111111111100","0001113111111110","0011111111111110","0111111111111100","1111111111111000","1111011111100000","0110001111000000","0000001111000000","0000000110000000","0000000000000000"],
+    dragon:["0110000000000000","0111000000011000","0111100000111100","0011110011113100","0001111111111100","1101111111111110","1111111111111111","1111311111111110","0111111111111110","0011111111111100","0111111111111110","1111111111111100","1110011111100000","0000011111000000","0000110011000000","0001100001100000"],
+    skeleton:["0000011111100000","0000111111110000","0001111111111000","0001131131311000","0001131131311000","0001111111111000","0001111111111000","0000111111110000","0000011111100000","0001111111111000","0011111111111100","0111011111101110","0110011111100110","0000011111100000","0000110000110000","0001100000011000"],
+    demon:["1100000000000011","1110000000000111","0111000000001110","0011111111111100","0111111111111110","1111311111131111","1111311111131111","1111111111111111","0111111441111110","0111111111111110","0011111111111100","0111111111111110","1111011111101111","1100011111100011","0000110000110000","0001100000011000"],
+    lich:["0000011111100000","0000111111110000","0001111111111000","0001113113111000","0001113113111000","0001111111111000","0000111111110000","0001111111111000","0011111111111100","0111111111111110","1111111111111111","0111111111111110","0011111111111100","0001111111110000","0011000000001100","0110000000000110"],
+    fallen_angel:["0001000110000100","0011100110011100","0111110110111110","1111111111111111","0001111111111000","0001113113111000","0001111111111000","0001111111111000","0011111111111100","0111111111111110","0111111111111110","0011111111111100","0001111111110000","0011100000011100","0011000000001100","0110000000000110"],
+    demon_lord:["1100000000000011","1110011001100111","0111111111111110","0111311111131110","1111111111111111","1111311111131111","1111111111111111","1111111441111111","0111111111111110","0111111111111110","0011111111111100","0111111111111110","1111111111111111","1110011111100111","0100110000110010","0001100000011000"],
+  };
+  const pat = patterns[type] || patterns.slime;
+  const dark = shade(color,-35);
+  let r = "";
+  for (let y=0;y<pat.length;y++) for (let x=0;x<pat[y].length;x++){
+    const c=pat[y][x]; if(c==="0")continue;
+    let f=color; if(c==="2")f=dark; else if(c==="3")f="#fff"; else if(c==="4")f="#1a1020";
+    r+=`<rect x="${x*cell}" y="${y*cell}" width="${cell}" height="${cell}" fill="${f}"/>`;
+  }
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">${r}</svg>`;
+}
+function shade(hex,p){hex=hex.replace('#','');let r=parseInt(hex.substr(0,2),16),g=parseInt(hex.substr(2,2),16),b=parseInt(hex.substr(4,2),16);r=Math.max(0,Math.min(255,r+Math.round(255*p/100)));g=Math.max(0,Math.min(255,g+Math.round(255*p/100)));b=Math.max(0,Math.min(255,b+Math.round(255*p/100)));return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');}
+
+// 怪物資料（精簡版，只需血量和外觀）
+const MONSTERS = [
+  {id:1,name:"水藍史萊姆",tier:"史萊姆",hp:700,color:"#5ec8e0",emoji:"slime"},{id:2,name:"翠綠史萊姆",tier:"史萊姆",hp:900,color:"#6ee07a",emoji:"slime"},{id:3,name:"烈焰史萊姆",tier:"史萊姆",hp:1100,color:"#ff8a5e",emoji:"slime"},{id:4,name:"雷光史萊姆",tier:"史萊姆",hp:1350,color:"#ffe45e",emoji:"slime"},{id:5,name:"雙子史萊姆",tier:"史萊姆",hp:1600,color:"#c89aff",emoji:"slime_king"},{id:6,name:"黃金史萊姆",tier:"史萊姆",hp:1900,color:"#ffd24a",emoji:"slime_king"},
+  {id:7,name:"森林大鼠",tier:"獸",hp:2300,color:"#b08868",emoji:"beast"},{id:8,name:"尖角野兔",tier:"獸",hp:2700,color:"#d0c0a8",emoji:"beast"},{id:9,name:"暗影野狼",tier:"獸",hp:3200,color:"#7a7a96",emoji:"wolf"},{id:10,name:"鋼爪熊",tier:"獸",hp:3800,color:"#8a6850",emoji:"beast"},{id:11,name:"毒牙蜥蜴",tier:"獸",hp:4400,color:"#7ac85a",emoji:"wolf"},{id:12,name:"雙頭犬",tier:"獸",hp:5100,color:"#9a5a4a",emoji:"wolf"},{id:13,name:"岩石巨蟹",tier:"獸",hp:5900,color:"#c87a5a",emoji:"beast"},
+  {id:14,name:"尖嘴蝙蝠王",tier:"飛行",hp:6800,color:"#8a5acb",emoji:"bat"},{id:15,name:"毒翅蛾",tier:"飛行",hp:7700,color:"#aa7acb",emoji:"bat"},{id:16,name:"風暴鷹身女妖",tier:"飛行",hp:8700,color:"#5acbb0",emoji:"harpy"},{id:17,name:"石化雞蛇",tier:"飛行",hp:9800,color:"#c8b05a",emoji:"harpy"},{id:18,name:"雷鳴翼龍",tier:"飛行",hp:11000,color:"#5e8ae0",emoji:"wyvern"},{id:19,name:"暗夜飛龍",tier:"飛行",hp:12500,color:"#6a5a8a",emoji:"wyvern"},
+  {id:20,name:"幼年綠龍",tier:"龍",hp:14000,color:"#6ec85a",emoji:"dragon"},{id:21,name:"沼澤毒龍",tier:"龍",hp:16000,color:"#8ac85a",emoji:"dragon"},{id:22,name:"烈火紅龍",tier:"龍",hp:18500,color:"#e05a4a",emoji:"dragon"},{id:23,name:"寒霜白龍",tier:"龍",hp:21000,color:"#aee0f0",emoji:"dragon"},{id:24,name:"雷帝青龍",tier:"龍",hp:24000,color:"#5ec8ff",emoji:"dragon"},{id:25,name:"大地黃龍",tier:"龍",hp:27500,color:"#d4a850",emoji:"dragon"},{id:26,name:"暗黑魔龍",tier:"龍",hp:31500,color:"#6a4a8a",emoji:"dragon"},{id:27,name:"聖光神龍",tier:"龍",hp:36000,color:"#ffe8a8",emoji:"dragon"},
+  {id:28,name:"骷髏士兵",tier:"魔族",hp:41000,color:"#d0d0c0",emoji:"skeleton"},{id:29,name:"骷髏將軍",tier:"魔族",hp:46000,color:"#e0e0d0",emoji:"skeleton"},{id:30,name:"炎獄惡魔",tier:"魔族",hp:52000,color:"#ff6a4a",emoji:"demon"},{id:31,name:"冰獄惡魔",tier:"魔族",hp:58000,color:"#6ad0ff",emoji:"demon"},{id:32,name:"深淵巫妖",tier:"魔族",hp:65000,color:"#8a5acb",emoji:"lich"},{id:33,name:"夢魘魔女",tier:"魔族",hp:72000,color:"#cb5a9a",emoji:"lich"},{id:34,name:"墮天使長",tier:"魔族",hp:80000,color:"#e0c85a",emoji:"fallen_angel"},
+  {id:35,name:"魔王親衛",tier:"魔王",hp:90000,color:"#9a4a6a",emoji:"demon_lord"},{id:36,name:"混沌使徒",tier:"魔王",hp:105000,color:"#7a4acb",emoji:"demon"},{id:37,name:"破滅龍王",tier:"魔王",hp:122000,color:"#aa3a4a",emoji:"dragon"},{id:38,name:"虛無之影",tier:"魔王",hp:142000,color:"#4a3a6a",emoji:"lich"},{id:39,name:"大魔王",tier:"魔王",hp:165000,color:"#8a2a4a",emoji:"demon_lord"},{id:40,name:"終焉魔神",tier:"魔王",hp:200000,color:"#c81a3a",emoji:"demon_lord"},
+];
+const HERO_RANKS=[{d:0,t:"見習冒險者",i:"🗡"},{d:3,t:"初級冒險者",i:"⚔"},{d:6,t:"正式冒險者",i:"🛡"},{d:10,t:"資深戰士",i:"⚜"},{d:14,t:"勇猛鬥士",i:"🔱"},{d:19,t:"龍之獵人",i:"🐉"},{d:24,t:"龍騎士",i:"🐲"},{d:28,t:"魔族剋星",i:"💀"},{d:34,t:"傳說勇者",i:"👑"},{d:39,t:"魔王討伐者",i:"🌟"},{d:40,t:"救世英雄",i:"✨"}];
+
+function getMonster(id){return MONSTERS.find(m=>m.id===id);}
+function getRank(d){let r=HERO_RANKS[0];for(const x of HERO_RANKS)if(d>=x.d)r=x;return r;}
+
+// 計算連續天數
+function calcStreak(records){
+  const dates=[...new Set(records.filter(r=>!r.is_history).map(r=>r.date).filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d)))].sort();
+  if(!dates.length)return 0;
+  let s=1;
+  for(let i=dates.length-1;i>0;i--){
+    const d1=new Date(dates[i]),d0=new Date(dates[i-1]);
+    if((d1-d0)/86400000===1)s++;else break;
+  }
+  return s;
+}
+
+async function loadData() {
+  if (!SB_URL || !SB_KEY) { showSetup(); return; }
+  document.getElementById('content').innerHTML = '<div class="loading">📡 讀取資料中...</div>';
+  try {
+    // Supabase REST 讀取 id=main 那一筆
+    const url = `${SB_URL.replace(/\/$/,'')}/rest/v1/wiki_data?id=eq.main&select=data`;
+    const res = await fetch(url, { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY } });
+    if (!res.ok) throw new Error('讀取失敗 HTTP ' + res.status);
+    const rows = await res.json();
+    if (!rows.length) throw new Error('電腦還沒同步過資料');
+    render(rows[0].data);
+  } catch (e) {
+    document.getElementById('content').innerHTML =
+      `<div class="error">✗ 讀取失敗<br><br>${e.message}<br><br>可能原因：<br>1. URL 或 key 不對<br>2. 電腦還沒同步過資料<br>3. 網路問題</div>
+       <button class="refresh-btn" onclick="resetSetup()">重新設定</button>`;
+  }
+}
+
+function render(db) {
+  const records = db.daily_records || [];
+  const rpg = db.rpg || {};
+  const listening = db.listening_logs || [];
+
+  // 統計
+  const totalHours = records.reduce((s,r)=>s+(r.hours||0),0);
+  const totalChars = records.reduce((s,r)=>s+(r.char_count||0),0);
+  const totalListen = Math.round(listening.reduce((s,l)=>s+(l.minutes||0),0)/60*10)/10;
+  const validDates = [...new Set(records.filter(r=>!r.is_history).map(r=>r.date).filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d)))];
+  const totalDays = validDates.length;
+  const streak = calcStreak(records);
+
+  // RPG
+  const defeated = rpg.defeated_monsters || [];
+  const defeatedIds = new Set(defeated.map(d=>d.id));
+  const curId = rpg.current_monster_id || 1;
+  const monster = getMonster(curId);
+  let hpLeft = rpg.current_monster_hp_left;
+  if (monster && (hpLeft===null||hpLeft===undefined)) hpLeft = monster.hp;
+  const rank = getRank(defeated.length);
+  const achievements = rpg.achievements || [];
+
+  document.getElementById('update-time').textContent =
+    '更新於 ' + new Date().toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
+
+  let html = '';
+
+  // 連續天數大卡
+  html += `<div class="streak-card">
+    <div class="streak-flame">🔥</div>
+    <div class="streak-num">${totalDays}</div>
+    <div class="streak-label">累積學習天數</div>
+  </div>`;
+
+  // 統計四格
+  html += `<div class="card"><div class="stat-grid">
+    <div class="stat"><div class="stat-num">${totalHours.toFixed(0)}h</div><div class="stat-label">閱讀時數</div></div>
+    <div class="stat"><div class="stat-num">${totalListen}h</div><div class="stat-label">聽力時數</div></div>
+    <div class="stat"><div class="stat-num">${totalChars>=10000?(totalChars/10000).toFixed(1)+'萬':totalChars}</div><div class="stat-label">累積字數</div></div>
+    <div class="stat"><div class="stat-num">${streak}</div><div class="stat-label">連續天數</div></div>
+  </div></div>`;
+
+  // 戰鬥畫面
+  html += `<div class="card"><div class="card-title">⚔ 當前戰鬥</div>
+    <div style="text-align:center"><div class="hero-rank">${rank.i} ${rank.t}</div></div>`;
+  if (monster) {
+    const pct = Math.round(hpLeft/monster.hp*1000)/10;
+    html += `<div class="monster-stage">
+      <div class="monster-name">${monster.name}</div>
+      <div class="monster-tier">${monster.tier}級</div>
+      <div>${makeMonsterSVG(monster.emoji, monster.color, 120)}</div>
+    </div>
+    <div class="hp-label"><span>HP</span><span>${hpLeft} / ${monster.hp}</span></div>
+    <div class="hp-track"><div class="hp-fill" style="width:${pct}%"></div></div>`;
+  } else {
+    html += `<div style="text-align:center;padding:30px"><div style="font-size:40px">🏆</div><div style="margin-top:10px;font-weight:700">世界已被拯救！</div></div>`;
+  }
+  html += `<div class="progress-text">已討伐 ${defeated.length} / ${MONSTERS.length} 隻怪物</div></div>`;
+
+  // 圖鑑迷你
+  html += `<div class="card"><div class="card-title">📖 怪物圖鑑</div><div class="bestiary-mini">`;
+  MONSTERS.forEach(m => {
+    let cls='bcell';
+    if(defeatedIds.has(m.id))cls+=' defeated';
+    else if(m.id===curId)cls+=' current';
+    else cls+=' locked';
+    const sprite=(defeatedIds.has(m.id)||m.id===curId)?makeMonsterSVG(m.emoji,m.color,36):'<div class="qmark">?</div>';
+    html+=`<div class="${cls}">${sprite}</div>`;
+  });
+  html += `</div></div>`;
+
+  // 成就
+  const ALL_ACH=[
+    {id:"first_blood",n:"初次討伐",i:"🩸"},{id:"defeat_5",n:"嶄露頭角",i:"🗡"},{id:"defeat_10",n:"身經百戰",i:"⚔"},{id:"defeat_20",n:"半數討伐",i:"🛡"},{id:"defeat_30",n:"討伐大師",i:"🔱"},
+    {id:"streak_3",n:"三日堅持",i:"✨"},{id:"streak_7",n:"七日不輟",i:"🔥"},{id:"streak_14",n:"雙週修行",i:"🌟"},{id:"streak_30",n:"月之勇者",i:"🌙"},{id:"streak_100",n:"百日傳說",i:"💯"},
+    {id:"slime_master",n:"史萊姆剋星",i:"💧"},{id:"beast_master",n:"馴獸之王",i:"🐾"},{id:"sky_master",n:"制空王者",i:"🪽"},{id:"dragon_slayer",n:"屠龍者",i:"🐲"},{id:"demon_hunter",n:"滅魔者",i:"💀"},
+    {id:"demon_lord_slain",n:"世界的救世主",i:"🏆"},{id:"domain_3",n:"語域涉獵",i:"📖"},{id:"domain_5",n:"語域探索者",i:"🗺"},{id:"domain_8",n:"語域大師",i:"🌐"},
+    {id:"hours_100",n:"百時修行",i:"⏳"},{id:"hours_300",n:"勤學不倦",i:"📚"},{id:"hours_500",n:"千錘百鍊",i:"⚡"},{id:"hours_1000",n:"語言大師",i:"🎓"},{id:"listen_50",n:"傾聽者",i:"🎧"},
+  ];
+  const unlockedSet=new Set(achievements);
+  const unlockedCount=ALL_ACH.filter(a=>unlockedSet.has(a.id)).length;
+  html += `<div class="card"><div class="card-title">🏆 成就（${unlockedCount}/${ALL_ACH.length}）</div><div class="ach-grid">`;
+  ALL_ACH.forEach(a => {
+    const on=unlockedSet.has(a.id);
+    html+=`<div class="ach ${on?'unlocked':'locked'}"><div class="ach-icon">${on?a.i:'🔒'}</div><div class="ach-name">${a.n}</div></div>`;
+  });
+  html += `</div></div>`;
+
+  // ── 學習內容（最近的）──
+  const vocab = db.vocab || [];
+  const scenes = db.scenes || [];
+  const patterns = db.patterns || [];
+  // i+1 句：從最近的每日記錄收集
+  const recentRecords = (db.daily_records || []).filter(r=>!r.is_history).slice(-5).reverse();
+  let i1 = [];
+  recentRecords.forEach(r => (r.i_plus_one||[]).forEach(s => i1.push(s)));
+
+  // 最新單字
+  if (vocab.length) {
+    html += `<div class="card"><div class="card-title">📝 最近單字（${vocab.length}）</div>`;
+    vocab.slice(0, 30).forEach(v => {
+      html += `<div class="vocab-item">
+        <div class="vocab-word">${v.word||''}</div>
+        ${v.exposure_count?`<div class="vocab-meta">出現 ${v.exposure_count} 次${v.status?' · '+v.status:''}</div>`:''}
+        ${(v.sentences&&v.sentences.length)?`<div class="vocab-sent">${v.sentences[v.sentences.length-1]}</div>`:''}
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // i+1 回顧句
+  if (i1.length) {
+    html += `<div class="card"><div class="card-title">🎯 最近 i+1 回顧句</div>`;
+    i1.slice(0, 15).forEach(s => { html += `<div class="i1-item">${s}</div>`; });
+    html += `</div>`;
+  }
+
+  // 場景
+  if (scenes.length) {
+    html += `<div class="card"><div class="card-title">🎬 最近場景</div>`;
+    scenes.slice(-12).reverse().forEach(s => {
+      const sent = (s.sentences && s.sentences.length) ? s.sentences[0] : '';
+      html += `<div class="scene-item">
+        ${s.title?`<div class="scene-title">${s.title}</div>`:''}
+        ${s.emotion?`<div class="scene-sum">情緒：${s.emotion}${s.domain?' · '+s.domain:''}</div>`:''}
+        ${sent?`<div class="scene-sent">${sent}</div>`:''}
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // 語言模式
+  if (patterns.length) {
+    html += `<div class="card"><div class="card-title">💡 語言模式</div>`;
+    patterns.slice(-12).reverse().forEach(p => {
+      const ex = (p.examples && p.examples.length) ? p.examples[p.examples.length-1] : '';
+      html += `<div class="pattern-item">
+        ${p.name?`<div class="pattern-name">${p.name}</div>`:''}
+        ${p.feel?`<div class="pattern-exp">${p.feel}</div>`:''}
+        ${ex?`<div class="pattern-ex">${ex}</div>`:''}
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `<button class="refresh-btn" onclick="loadData()">🔄 重新整理</button>`;
+
+  document.getElementById('content').innerHTML = html;
+}
+
+function showSetup() {
+  document.getElementById('update-time').textContent = '首次設定';
+  document.getElementById('content').innerHTML = `
+    <div class="card">
+      <div class="card-title">📱 首次設定</div>
+      <div class="setup-box">
+        在電腦版的「設定」→<br>
+        <b>📱 手機同步</b> 區塊，<br>
+        把 <b>Project URL</b> 和 <b>anon key</b><br>
+        分別貼到下面。
+      </div>
+      <input type="text" id="url-input" placeholder="Project URL (https://xxx.supabase.co)">
+      <input type="text" id="key-input" placeholder="anon key (eyJhbGci...)" style="margin-top:8px">
+      <button class="refresh-btn" onclick="saveSupabase()">儲存並讀取</button>
+    </div>`;
+}
+function saveSupabase() {
+  const u = document.getElementById('url-input').value.trim();
+  const k = document.getElementById('key-input').value.trim();
+  if (!u || !k) return;
+  SB_URL = u; SB_KEY = k;
+  localStorage.setItem('supabase_url', u);
+  localStorage.setItem('supabase_key', k);
+  loadData();
+}
+function resetSetup() {
+  localStorage.removeItem('supabase_url');
+  localStorage.removeItem('supabase_key');
+  SB_URL = ''; SB_KEY = '';
+  showSetup();
+}
+
+loadData();
+</script>
+</body>
+</html>
